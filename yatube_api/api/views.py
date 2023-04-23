@@ -4,7 +4,6 @@ from rest_framework.pagination import LimitOffsetPagination
 
 from posts.models import Group, Post, Follow
 from .permissions import IsOwnerOrReadOnly
-
 from .serializers import (
     CommentSerializer,
     FollowSerializer,
@@ -27,22 +26,24 @@ class PostViewSet(viewsets.ModelViewSet):
 
 
 class CommentViewSet(viewsets.ModelViewSet):
-    queryset = Post.objects.all()
     serializer_class = CommentSerializer
     permission_classes = (
         permissions.IsAuthenticatedOrReadOnly,
         IsOwnerOrReadOnly,
     )
 
+    def get_post(self):
+        return get_object_or_404(Post, pk=self.kwargs.get('post_id'))
+
     def get_queryset(self):
-        post = get_object_or_404(Post, pk=self.kwargs.get('post_id'))
+        post = self.get_post()
         new_queryset = post.comments.all()
         return new_queryset
 
     def perform_create(self, serializer):
         serializer.save(
             author=self.request.user,
-            post=get_object_or_404(Post, pk=self.kwargs.get('post_id')),
+            post=self.get_post(),
         )
 
 
@@ -55,7 +56,7 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
 class FollowViewSet(viewsets.ModelViewSet):
     queryset = Follow.objects.all()
     serializer_class = FollowSerializer
-    permission_classes = (permissions.IsAuthenticated, IsOwnerOrReadOnly)
+    permission_classes = (permissions.IsAuthenticated,)
     filter_backends = (filters.SearchFilter,)
     search_fields = ('user__username', 'following__username')
 

@@ -9,9 +9,6 @@ class Group(models.Model):
     slug = models.SlugField(unique=True)
     description = models.TextField()
 
-    def __str__(self):
-        return self.title
-
 
 class Post(models.Model):
     text = models.TextField()
@@ -28,9 +25,6 @@ class Post(models.Model):
         null=True,
     )
 
-    def __str__(self):
-        return self.text
-
 
 class Comment(models.Model):
     author = models.ForeignKey(
@@ -44,9 +38,6 @@ class Comment(models.Model):
         'Дата добавления', auto_now_add=True, db_index=True
     )
 
-    def __str__(self):
-        return self.text
-
 
 class Follow(models.Model):
     user = models.ForeignKey(
@@ -55,6 +46,3 @@ class Follow(models.Model):
     following = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name='following'
     )
-
-    def __str__(self):
-        return f'{self.user} {self.following}'
