@@ -1,8 +1,13 @@
 from django.shortcuts import get_object_or_404
-from rest_framework import filters, permissions, viewsets
+from rest_framework.filters import SearchFilter
 from rest_framework.pagination import LimitOffsetPagination
+from rest_framework.permissions import (
+    IsAuthenticatedOrReadOnly,
+    IsAuthenticated,
+)
+from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 
-from posts.models import Group, Post, Follow
+from posts.models import Follow, Group, Post
 from .permissions import IsOwnerOrReadOnly
 from .serializers import (
     CommentSerializer,
@@ -12,12 +17,12 @@ from .serializers import (
 )
 
 
-class PostViewSet(viewsets.ModelViewSet):
+class PostViewSet(ModelViewSet):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
     pagination_class = LimitOffsetPagination
     permission_classes = (
-        permissions.IsAuthenticatedOrReadOnly,
+        IsAuthenticatedOrReadOnly,
         IsOwnerOrReadOnly,
     )
 
@@ -25,10 +30,10 @@ class PostViewSet(viewsets.ModelViewSet):
         serializer.save(author=self.request.user)
 
 
-class CommentViewSet(viewsets.ModelViewSet):
+class CommentViewSet(ModelViewSet):
     serializer_class = CommentSerializer
     permission_classes = (
-        permissions.IsAuthenticatedOrReadOnly,
+        IsAuthenticatedOrReadOnly,
         IsOwnerOrReadOnly,
     )
 
@@ -47,17 +52,16 @@ class CommentViewSet(viewsets.ModelViewSet):
         )
 
 
-class GroupViewSet(viewsets.ReadOnlyModelViewSet):
+class GroupViewSet(ReadOnlyModelViewSet):
     queryset = Group.objects.all()
     serializer_class = GroupSerializer
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
 
-class FollowViewSet(viewsets.ModelViewSet):
+class FollowViewSet(ModelViewSet):
     queryset = Follow.objects.all()
     serializer_class = FollowSerializer
-    permission_classes = (permissions.IsAuthenticated,)
-    filter_backends = (filters.SearchFilter,)
+    permission_classes = (IsAuthenticated,)
+    filter_backends = (SearchFilter,)
     search_fields = ('user__username', 'following__username')
 
     def get_queryset(self):

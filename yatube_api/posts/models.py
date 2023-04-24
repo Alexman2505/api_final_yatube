@@ -1,6 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.db import models
 
+
 User = get_user_model()
 
 
@@ -8,6 +9,9 @@ class Group(models.Model):
     title = models.CharField(max_length=200)
     slug = models.SlugField(unique=True)
     description = models.TextField()
+
+    class Meta:
+        ordering = ['id']
 
 
 class Post(models.Model):
@@ -25,6 +29,9 @@ class Post(models.Model):
         null=True,
     )
 
+    class Meta:
+        ordering = ['author']
+
 
 class Comment(models.Model):
     author = models.ForeignKey(
@@ -38,6 +45,9 @@ class Comment(models.Model):
         'Дата добавления', auto_now_add=True, db_index=True
     )
 
+    class Meta:
+        ordering = ['post']
+
 
 class Follow(models.Model):
     user = models.ForeignKey(
@@ -46,3 +56,6 @@ class Follow(models.Model):
     following = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name='following'
     )
+
+    class Meta:
+        ordering = ['user']
