@@ -1,11 +1,16 @@
 from django.shortcuts import get_object_or_404
 from rest_framework.filters import SearchFilter
+from rest_framework.mixins import CreateModelMixin, ListModelMixin
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import (
     IsAuthenticatedOrReadOnly,
     IsAuthenticated,
 )
-from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
+from rest_framework.viewsets import (
+    GenericViewSet,
+    ModelViewSet,
+    ReadOnlyModelViewSet,
+)
 
 from posts.models import Follow, Group, Post
 from .permissions import IsOwnerOrReadOnly
@@ -57,8 +62,15 @@ class GroupViewSet(ReadOnlyModelViewSet):
     serializer_class = GroupSerializer
 
 
-class FollowViewSet(ModelViewSet):
-    queryset = Follow.objects.all()
+class CreateListViewSet(CreateModelMixin, ListModelMixin, GenericViewSet):
+    '''Класс, который получает список подписок (GET-ListModelMixin)
+    и создает (POST-CreateModelMixin) подписку.
+    '''
+
+    pass
+
+
+class FollowViewSet(CreateListViewSet):
     serializer_class = FollowSerializer
     permission_classes = (IsAuthenticated,)
     filter_backends = (SearchFilter,)
